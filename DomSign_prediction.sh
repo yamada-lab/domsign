@@ -58,35 +58,30 @@ do
                 printf "input data in a defined absolute directory, about the format, see readme.txt:  "
                 echo $OPTARG
                 query_file=$OPTARG
-                echo $query_file
                 export query_file
                 ;;
              r)
                 printf "reference data in a defined absolute directory, about the format, see readme.txt:  "
                 echo $OPTARG
                 reference_file=$OPTARG
-                echo $reference_file
                 export reference_file
                 ;;
              e)
                 echo "specific enzyme signature a defined absolute directory, about the format, see readme.txt:  "
                 echo $OPTARG
                 specific_enzyme_signature_file=$OPTARG
-                echo $specific_enzyme_signature_file
                 export specific_enzyme_signature_file
                 ;;
              s)
                 printf "specificity threshold used in this annotation, which should be >=0.5 and <=1.0:  "
                 echo $OPTARG
                 specificity_threshold=$OPTARG
-                echo $specificity_threshold
                 export specificity_threshold
                 ;;
              o)
                 printf "output file:   "
                 echo $OPTARG
                 output_file=$OPTARG
-                echo $output_file
                 export output_file
                 ;;
         esac
@@ -101,7 +96,7 @@ cd "$SCRIPTPATH""/working_directory/"
 
 # now 1.0 part starts:
 cp "$reference_file" ../annotation_reference_file_construction/reference.dat
-cp "$specific_enzyme_signature_file" ../annotation_reference_file_construction/purify_reference/specific_enzyme_ds_in_string.list
+cp "$specific_enzyme_signature_file" ../annotation_reference_file_construction/specific_enzyme_ds_in_string.list
 cd ../annotation_reference_file_construction/
 bash main.sh
 cd ../

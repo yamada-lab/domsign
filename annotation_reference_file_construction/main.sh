@@ -4,12 +4,9 @@
 # proteinID ec ds1 ds2 ds3 ...
 
 # Part0: purify reference.dat by specific_enzyme_ds (remove Non-enzyme, EC=-.-.-.- and those beyond the specific enzyme domain signatures)
-mv reference.dat purify_reference/
-cd purify_reference/
-bash purify_reference.sh
-rm reference.dat
-mv purified_reference.dat ../reference.dat  # rename new processing file
-cd ../
+python purify_reference.py
+rm reference.dat specific_enzyme_ds_in_string.list
+mv purified_reference.dat reference.dat  # rename new processing file
 
 # //////////////////////////
 # Part1: convert to reference.dat.formated

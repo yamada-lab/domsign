@@ -64,10 +64,8 @@ for ds in abundance_matrix:
     #print '   ',
     #print dominat_ec_subgroup
 
-print "number of ds-ec pairs for the "+args.level+" ec hierarchy level:  ",
-print len(domain_signature_ec_dic)
-print "number of 100% specific ds-ec pairs for the "+args.level+" ec hierarchy level:  ",
-print str(specific_number)
+print ('number of ds-ec pairs for the '+args.level+' ec hierarchy level:  {}'.format(str(len(domain_signature_ec_dic))))
+print ('number of 100% specific ds-ec pairs for the '+args.level+' ec hierarchy level:  {}'.format(str(specific_number)))
 pickle.dump(domain_signature_ec_dic,open(args.directry+'/domain_signature_ec_dic_'+args.level+'_pickle_'+args.session_id,'wb'))
 
 

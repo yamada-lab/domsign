@@ -79,9 +79,9 @@ for i in ds_1:
     if i not in ds_2:
         surplus_from_1_to_2.append(i)
 
-print 'number of domain signature in annotation file 1 but not in 2:%d'%(len(surplus_from_1_to_2))
-print 'number of domain signature in annotation file 2 but not in 3:%d'%(len(surplus_from_2_to_3))
-print 'number of domain signature in annotation file 3 but not in 4:%d'%(len(surplus_from_3_to_4))
+print ('number of domain signature in annotation file 1 but not in 2:{}'.format(str(len(surplus_from_1_to_2))))
+print ('number of domain signature in annotation file 2 but not in 3:{}'.format(str(len(surplus_from_2_to_3))))
+print ('number of domain signature in annotation file 3 but not in 4:{}'.format(str(len(surplus_from_3_to_4))))
 
 protein_without_ref_ds_count=0
 #///////////////////////////////////////////////////////

@@ -98,16 +98,16 @@ done
 # ec1\td1\td2
 # ec2\td1
 # Among them, the proteins with multiple EC numbers are divided into several sub EC group here.
-python ${DOMSIGN_ROOT}/src/python/purify_reference.py -o ${DOMSIGN_ROOT}/tmp/reference_${session_id}.dat -r ${reference_file} -e ${specific_enzyme_signature_file}
+python3 ${DOMSIGN_ROOT}/src/python/purify_reference.py -o ${DOMSIGN_ROOT}/tmp/reference_${session_id}.dat -r ${reference_file} -e ${specific_enzyme_signature_file}
 
 # Part2: construct basic ec-domain signature dictionary and move them to corresponding directory
-python ${DOMSIGN_ROOT}/src/python/associate_domain_ec.py -i ${DOMSIGN_ROOT}/tmp/reference_${session_id}.dat -o ${DOMSIGN_ROOT}/tmp -s ${session_id}
+python3 ${DOMSIGN_ROOT}/src/python/associate_domain_ec.py -i ${DOMSIGN_ROOT}/tmp/reference_${session_id}.dat -o ${DOMSIGN_ROOT}/tmp -s ${session_id}
 
 # Part3: construct annotation reference and stack them into one directory called annotation_reference
-python ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/tmp -l 1st -s ${session_id}
-python ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/tmp -l 2nd -s ${session_id}
-python ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/tmp -l 3rd -s ${session_id}
-python ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/tmp -l 4th -s ${session_id}
+python3 ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/tmp -l 1st -s ${session_id}
+python3 ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/tmp -l 2nd -s ${session_id}
+python3 ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/tmp -l 3rd -s ${session_id}
+python3 ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/tmp -l 4th -s ${session_id}
 
 
 
@@ -125,7 +125,7 @@ python ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/t
 
 # Specificity of 1.0, 0.99, 0.97, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65 will be used to do annotation, respectively
 # All the results will be stored in one txt file called 'final_result.txt'
-python ${DOMSIGN_ROOT}/src/python/ds_based_enzyme_anno_protocol.py -q ${query_file} -d ${DOMSIGN_ROOT}/tmp -t ${specificity_threshold} -s ${session_id} -o ${output_file}
+python3 ${DOMSIGN_ROOT}/src/python/ds_based_enzyme_anno_protocol.py -q ${query_file} -d ${DOMSIGN_ROOT}/tmp -t ${specificity_threshold} -s ${session_id} -o ${output_file}
 
 
 ################ Remove temporally files

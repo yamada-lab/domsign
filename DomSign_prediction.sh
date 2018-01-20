@@ -36,14 +36,14 @@
 # you can also use the Swiss-Prot enzyme reference provided under the directory working_directoty/reference/
 
 # Example
-# ./DomSign.prediction.sh -i ~/domsign/example_prediction/query.dat -r ~/domsign/example_prediction/reference.dat -e ~/domsign/example_prediction/specific_enzyme_ds_in_string.list -s 0.95 -o ~/domsign/example_prediction/nimei95
+# ./DomSign_prediction.sh -i ~/domsign/example_prediction/query.dat -r ~/domsign/example_prediction/reference.dat -e ~/domsign/example_prediction/specific_enzyme_ds_in_string.list -t 0.95 -o ~/domsign/example_prediction/nimei95 -s 1
 
 # /////////////////////////////////
 # /////////////////////////////////
 
 # get the absolute path of DomSign tool without the last '/'
-SCRIPTPATH=$( cd "$(dirname "$0")" ; pwd -P )  
-export SCRIPTPATH
+cd `dirname $0`
+DOMSIGN_ROOT=`pwd -P`
 
 # -i input data in a defined absolute directory
 # -r the reference used
@@ -51,59 +51,84 @@ export SCRIPTPATH
 # -s specificity threshold used in this annotation
 # -o output file
 
-while getopts "i:r:e:s:o:" arg
+while getopts "i:r:e:t:o:s:" arg
 do
-        case $arg in
+        case ${arg} in
              i)
                 printf "input data in a defined absolute directory, about the format, see readme.txt:  "
-                echo $OPTARG
-                query_file=$OPTARG
-                export query_file
+                echo ${OPTARG}
+                query_file=${OPTARG}
                 ;;
              r)
                 printf "reference data in a defined absolute directory, about the format, see readme.txt:  "
-                echo $OPTARG
-                reference_file=$OPTARG
-                export reference_file
+                echo ${OPTARG}
+                reference_file=${OPTARG}
                 ;;
              e)
                 echo "specific enzyme signature a defined absolute directory, about the format, see readme.txt:  "
                 echo $OPTARG
-                specific_enzyme_signature_file=$OPTARG
-                export specific_enzyme_signature_file
+                specific_enzyme_signature_file=${OPTARG}
                 ;;
-             s)
+             t)
                 printf "specificity threshold used in this annotation, which should be >=0.5 and <=1.0:  "
-                echo $OPTARG
-                specificity_threshold=$OPTARG
-                export specificity_threshold
+                echo ${OPTARG}
+                specificity_threshold=${OPTARG}
                 ;;
              o)
                 printf "output file:   "
-                echo $OPTARG
-                output_file=$OPTARG
-                export output_file
+                echo ${OPTARG}
+                output_file=${OPTARG}
+                ;;
+             s)
+                printf "session ID manage multiple jobs:  "
+                echo ${OPTARG}
+                session_id=${OPTARG}
                 ;;
         esac
 done
 
-# copy the query to the working directory
-cp "$query_file" "$SCRIPTPATH""/working_directory/query.dat"
 
-# cd to the working directory and ready to go
-cd "$SCRIPTPATH""/working_directory/"
+############## now 1.0 part starts:
+# it is devide into several parts
+# the input file name is reference.dat with data structure like:
+# proteinID ec ds1 ds2 ds3 ...
+
+# Part0: purify reference.dat by specific_enzyme_ds (remove Non-enzyme, EC=-.-.-.- and those beyond the specific enzyme domain signatures)
+# Part1: convert to reference.dat.formated
+# ec1\td1\td2
+# ec2\td1
+# Among them, the proteins with multiple EC numbers are divided into several sub EC group here.
+python ${DOMSIGN_ROOT}/src/python/purify_reference.py -o ${DOMSIGN_ROOT}/tmp/reference_${session_id}.dat -r ${reference_file} -e ${specific_enzyme_signature_file}
+
+# Part2: construct basic ec-domain signature dictionary and move them to corresponding directory
+python ${DOMSIGN_ROOT}/src/python/associate_domain_ec.py -i ${DOMSIGN_ROOT}/tmp/reference_${session_id}.dat -o ${DOMSIGN_ROOT}/tmp -s ${session_id}
+
+# Part3: construct annotation reference and stack them into one directory called annotation_reference
+python ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/tmp -l 1st -s ${session_id}
+python ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/tmp -l 2nd -s ${session_id}
+python ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/tmp -l 3rd -s ${session_id}
+python ${DOMSIGN_ROOT}/src/python/machine_learning_model.py -d ${DOMSIGN_ROOT}/tmp -l 4th -s ${session_id}
 
 
-# now 1.0 part starts:
-cp "$reference_file" ../annotation_reference_file_construction/reference.dat
-cp "$specific_enzyme_signature_file" ../annotation_reference_file_construction/specific_enzyme_ds_in_string.list
-cd ../annotation_reference_file_construction/
-bash main.sh
-cd ../
-cp working_directory/query.dat annotation_pipeline/
 
-# /////////////////////////////////
-# now 2.0 part starts:
-cd annotation_pipeline/
-bash main.sh
-cd ../
+################ now 2.0 part starts:
+# two files are needed
+
+# First one: query.dat
+# Description: query data, with data structure in every line like:
+# proteinID EC ds1 ds2 ds3 ...
+# the domain signature of this query don't have need to be filtered by ds in reference
+
+# Second one: four reference pickle file in one directory called annotation_reference
+
+# The ds not in reference will be annotated as EC:-.-.-.-
+
+# Specificity of 1.0, 0.99, 0.97, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65 will be used to do annotation, respectively
+# All the results will be stored in one txt file called 'final_result.txt'
+python ${DOMSIGN_ROOT}/src/python/ds_based_enzyme_anno_protocol.py -q ${query_file} -d ${DOMSIGN_ROOT}/tmp -t ${specificity_threshold} -s ${session_id} -o ${output_file}
+
+
+################ Remove temporally files
+rm ${DOMSIGN_ROOT}/tmp/reference_${session_id}.dat
+rm ${DOMSIGN_ROOT}/tmp/ec_domain_*_pickle_${session_id}
+rm ${DOMSIGN_ROOT}/tmp/domain_signature_ec_dic_*_pickle_${session_id}
